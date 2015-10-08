@@ -14,6 +14,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
 import javax.persistence.Query;
+import javax.persistence.TypedQuery;
 
 public class PersonFacade {
 
@@ -23,7 +24,7 @@ public class PersonFacade {
     /**
      * Create a person in database.
      *
-     * @param Person object
+     * @param person the person object to persist in database
      * @return Person object
      */
     public Person createPerson(Person person) {
@@ -36,7 +37,7 @@ public class PersonFacade {
     /**
      * Update a person in database.
      *
-     * @param Person object
+     * @param person the person object to update in database
      * @return Person object
      */
     public Person updatePerson(Person person) {
@@ -53,11 +54,23 @@ public class PersonFacade {
     /**
      * Delete a person in database.
      *
-     * @param Person object
+     * @param person the person to be deleted from database
      * @return Person object
      */
     public Person deletePerson(Person person) {
         if (em.find(Person.class, person.getId()) != null) {
+            TypedQuery<Phone> tq = em.createQuery("SELECT p FROM Phone p WHERE p.IE = :ie", Phone.class);
+            tq.setParameter("ie", person);
+            List<Phone> phoneList = tq.getResultList();
+            if (phoneList != null) {
+                for (int i = 0; i < phoneList.size(); i++) {
+                    Phone removeAssociationPhone = phoneList.get(i);
+                    removeAssociationPhone.setIE(null);
+                    em.getTransaction().begin();
+                    em.persist(removeAssociationPhone);
+                    em.getTransaction().commit();
+                }
+            }
             em.getTransaction().begin();
             em.remove(person);
             em.getTransaction().commit();
@@ -70,8 +83,9 @@ public class PersonFacade {
     /**
      * Returns the person with a given id.
      *
-     * @param Long 'id'
+     * @param id the id number of the person searched for
      * @return Person object
+     * @throws exceptions.PersonNotFoundException
      */
     public Person getPersonById(Long id) throws PersonNotFoundException {
         Person p = em.find(Person.class, id);
@@ -85,7 +99,7 @@ public class PersonFacade {
     /**
      * Returns the person with a given phone number.
      *
-     * @param String 'Phone number'
+     * @param number the phone number of the person searched for
      * @return Person object
      */
     public Person getPersonByPhone(String number) {
@@ -96,7 +110,7 @@ public class PersonFacade {
     /**
      * Returns a list of persons with a given hobby.
      *
-     * @param String 'hobby'
+     * @param hobby the hobby of which you want list of persons interested in
      * @return Person list
      */
     public List<Person> getPersonsWithHobby(String hobby) {
@@ -106,7 +120,7 @@ public class PersonFacade {
     /**
      * Returns the number of persons with a given hobby.
      *
-     * @param String 'hobby'
+     * @param hobby the hobby of which you want count of persons interested in
      * @return int
      */
     public int getNumberOfPersonsWithHobby(String hobby) {
@@ -116,17 +130,22 @@ public class PersonFacade {
     /**
      * Returns a list of person living i given city.
      *
-     * @param String 'city'
+     * @param city the zipcode of the city you want to find persons from
      * @return Person list
      */
-    public List<Person> getPersonsLivingInCity(String city) {
-        throw new UnsupportedOperationException(); //NOT SUPPOERTED YET
+    public List<Person> getPersonsLivingInCity(String zipcode) {
+        TypedQuery<Person> q = em.createQuery("SELECT i FROM InfoEntity i WHERE i.address.cityInfo.zipCode = :zipcode", Person.class);
+        q.setParameter("zipcode", zipcode);
+        return q.getResultList();
     }
 
-    //TEST THIS WHEN NAMEDQUERY WORKS
+    /**
+     * Returns list of all persons i database
+     *
+     * @return List 'of persons'
+     */
     public List<Person> getListOfAllPersons() {
-        Query q = em.createNamedQuery("Infoentity.findByDtype");
-        q.setParameter("dtype", "Person");
+        TypedQuery<Person> q = em.createQuery("SELECT p Person p", Person.class);
         return q.getResultList();
     }
 

@@ -30,13 +30,6 @@ public class PersonRestService {
         pf = new PersonFacade();
     }
 
-    @GET
-    @Path("{id}")
-    @Produces("application/json")
-    public String getPersonById(@PathParam("id") long id) throws PersonNotFoundException {
-        return gson.toJson(pf.getPersonById(id));
-    }
-    
     @POST
     @Consumes("application/json")
     @Produces("application/json")
@@ -64,5 +57,47 @@ public class PersonRestService {
         Person p = pf.getPersonById(id);
         pf.deletePerson(p);
         return gson.toJson(p);
+    }
+    
+    @GET
+    @Path("{id}")
+    @Produces("application/json")
+    public String getPersonById(@PathParam("id") long id) throws PersonNotFoundException {
+        return gson.toJson(pf.getPersonById(id));
+    }
+    
+    @GET
+    @Path("phone/{number}")
+    @Produces("application/json")
+    public String getPersonByPhone(@PathParam("number")String number) {
+        return gson.toJson(pf.getPersonByPhone(number));
+    }
+    
+    @GET
+    @Path("hobby/{hobby}")
+    @Produces("application/json")
+    public String getPersonsWithHobby(@PathParam("hobby") String hobby) {
+        return gson.toJson(pf.getPersonsWithHobby(hobby));
+    }
+    
+    @GET
+    @Path("hobby/count/{hobby}")
+    @Produces("application/json")
+    public String getNumberOfPersonsWithHobby(@PathParam("hobby") String hobby) {
+        return gson.toJson(pf.getNumberOfPersonsWithHobby(hobby));
+    }
+    
+    @GET
+    @Path("city/{zipcode}")
+    @Produces("application/json")
+    public String getPersonsLivingInCity(@PathParam("zipcode") String zipcode) {
+        return gson.toJson(pf.getPersonsLivingInCity(zipcode));
+    }
+    
+    @GET
+    @Path("complete")
+    @Produces("application/json")
+    public String getListOfAllPersons() {
+        return gson.toJson(pf.getListOfAllPersons());
     }
 }
