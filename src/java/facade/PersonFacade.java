@@ -145,7 +145,26 @@ public class PersonFacade {
      * @return List 'of persons'
      */
     public List<Person> getListOfAllPersons() {
-        TypedQuery<Person> q = em.createQuery("SELECT p Person p", Person.class);
+        TypedQuery<Person> q = em.createQuery("SELECT p FROM Person p", Person.class);
+        return q.getResultList();
+    }
+    
+    /**
+     * Returns the first five results of persons matching the firstname searchword
+     * 
+     * @param name the firstname searchword
+     * @return List 'of persons limited to 5'
+     */
+    public List<Person> getListOfByNameLimitFive(String name) {
+        TypedQuery<Person> q = em.createQuery("SELECT p FROM Person p WHERE p.firstName LIKE :name", Person.class);
+        q.setParameter("name", name + "%");
+        q.setMaxResults(5);
+        return q.getResultList();
+    }
+    
+    public List<Person> getListOfByName(String name) {
+        TypedQuery<Person> q = em.createQuery("SELECT p FROM Person p WHERE p.firstName LIKE :name", Person.class);
+        q.setParameter("name", name + "%");
         return q.getResultList();
     }
 
